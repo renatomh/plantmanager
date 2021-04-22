@@ -6,7 +6,7 @@ import {
     StyleSheet,
 } from 'react-native';
 
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 // Componentes para a página
 import { Button } from '../components/Button';
@@ -14,13 +14,39 @@ import { Button } from '../components/Button';
 import colors from '../styles/colors';
 import fonts from '../styles/fonts';
 
+// Tipagem para os dados da página
+interface Params {
+    title: string;
+    subtitle: string;
+    buttonTitle: string;
+    icon: 'smile' | 'hug';
+    nextScreen: string;
+}
+
+// Definindo os emojis para a tela
+const emojis = {
+    hug: '🤗',
+    smile: '😁',
+}
+
 export function Confirmation() {
     // Utilizando a navegação do aplicativo
     const navigation = useNavigation();
+    // Definindo a utilização do 'route' para recuperar os dados passados na navegação
+    const route = useRoute();
+
+    // Pegando as informações passadas para a rota
+    const {
+        title,
+        subtitle,
+        buttonTitle,
+        icon,
+        nextScreen,
+    } = route.params as Params;
 
     // Função para navegar para a página segiunte
     function handleMoveOn() {
-        navigation.navigate('PlantSelect');
+        navigation.navigate(nextScreen);
     }
 
     return (
@@ -29,20 +55,19 @@ export function Confirmation() {
             <View style={styles.content}>
                 <Text style={styles.emoji}>
                     {/* No Windows, para acessar a lista de emojis usamos o atalho 'Win + .' */}
-                    😁
-                 </Text>
+                    {emojis[icon]}
+                </Text>
 
                 <Text style={styles.title}>
-                    Prontinho
+                    {title}
                 </Text>
 
                 <Text style={styles.subtitle}>
-                    Agora vamos começar a cuidar das suas
-                    plantinhas com muito cuidado.
+                    {subtitle}
                 </Text>
                 <View style={styles.footer}>
                     <Button
-                        title="Começar"
+                        title={buttonTitle}
                         onPress={handleMoveOn}
                     />
                 </View>

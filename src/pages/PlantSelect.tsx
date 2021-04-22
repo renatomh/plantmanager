@@ -9,6 +9,9 @@ import {
     FlatList,
     ActivityIndicator
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+
+import { PlantProps } from '../libs/storage';
 
 // Componentes para a página
 import { Header } from '../components/Header';
@@ -21,22 +24,10 @@ import api from '../services/api';
 import colors from '../styles/colors';
 import fonts from '../styles/fonts';
 
-// Definindo a tipagem para os ambientes e plantas
+// Definindo a tipagem para os ambientes
 interface EnvironmentProps {
     key: string;
     title: string;
-}
-interface PlantProps {
-    id: string;
-    name: string;
-    about: string;
-    water_tips: string;
-    photo: string;
-    environments: [string];
-    frequency: {
-        times: number;
-        repeat_every: string;
-    };
 }
 
 export function PlantSelect() {
@@ -50,7 +41,9 @@ export function PlantSelect() {
     // Criando os estados de paginação
     const [page, setPage] = useState(1);
     const [loadingMore, setLoadingMore] = useState(false);
-    const [loadedAll, setLoadedAll] = useState(false);
+
+    // Utilizando a navegação do aplicativo
+    const navigation = useNavigation();
 
     // Função para seleção de ambiente
     function handleEnvironmentSelected(environment: string) {
@@ -126,7 +119,13 @@ export function PlantSelect() {
         setPage(oldValue => oldValue + 1);
         // Chamando a função criada para carregar as plantas
         fetchPlant();
-    }
+    };
+
+    // Função para lidar com a seleção da planta e navegaçõa da tela
+    function handlePlantSelect(plant: PlantProps) {
+        // Navegando para a página da planta, já passando os dados dessa
+        navigation.navigate("PlantSave", { plant });
+    };
 
     // Verificando se a tela está carregando. Caso esteja, colocamos a animação
     if (loading) return <Load />
@@ -150,6 +149,8 @@ export function PlantSelect() {
                 <FlatList
                     // Definindo os dados para a lista
                     data={environments}
+                    // Definindo a chave para os itens
+                    keyExtractor={(item) => String(item.key)}
                     // Definindo como os dados serão renderizados
                     renderItem={({ item }) => (
                         <EnvironmentButton
@@ -174,9 +175,14 @@ export function PlantSelect() {
                 <FlatList
                     // Definindo os dados para a lista
                     data={filteredPlants}
+                    // Definindo a chave para os itens
+                    keyExtractor={(item) => String(item.id)}
                     // Definindo como os dados serão renderizados
                     renderItem={({ item }) => (
-                        <PlantCardPrimary data={item} />
+                        <PlantCardPrimary
+                            data={item}
+                            onPress={() => handlePlantSelect(item)}
+                        />
                     )}
                     // Desabilitando a barra de rolagem
                     showsVerticalScrollIndicator={false}
