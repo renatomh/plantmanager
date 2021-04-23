@@ -6,6 +6,7 @@ import {
     Image,
     FlatList,
     Alert,
+    RefreshControl,
 } from 'react-native';
 
 import { formatDistance } from 'date-fns';
@@ -28,6 +29,43 @@ export function MyPlants() {
     const [myPlants, setMyPlants] = useState<PlantProps[]>([]);
     const [loading, setLoading] = useState(true);
     const [nextWatered, setNextWatered] = useState<string>();
+    const [refreshing, setRefreshing] = useState(false);
+
+    // Função para carregar as plantas e a dica de texto do cabeçalho
+    async function loadStorageDate() {
+        const plantsStoraged = await loadPlant();
+        // Caso alguma planta tenha sido cadastrada
+        if (plantsStoraged.length > 0) {
+            // Definindo quanto tempo falta para a próxima rega (a partir de agora)
+            const nextTime = formatDistance(
+                new Date(plantsStoraged[0].dateTimeNotification).getTime(),
+                new Date().getTime(),
+                // Formatando em pt-BR
+                { locale: pt },
+            );
+            setNextWatered(
+                `Não esqueça de regar a ${plantsStoraged[0].name} (${nextTime}).`
+            );
+            // Apresentando as plantas salvas
+            plantsStoraged.map(item => { console.log(item) })
+        }
+        // Caso nenhuma planta tenha sido cadastrada
+        else setNextWatered(`Nenhuma planta cadastrada.`);
+
+        // Atualizando a lista de plantas do usuário
+        setMyPlants(plantsStoraged);
+        setLoading(false);
+    };
+
+    // Função para atualizar a visualização das plantas e do texto de dica visual
+    const onRefresh = React.useCallback(() => {
+        // Configurando o estado de "atualizando"
+        setRefreshing(true);
+        // Chamando a função para carregar os dados
+        loadStorageDate();
+        // Configurando o estado de "atualizando"
+        setRefreshing(false);
+    }, []);
 
     // Função para lidar com a remoção de itens
     function handleRemove(plant: PlantProps) {
@@ -61,31 +99,6 @@ export function MyPlants() {
 
     // A função 'useEffect' é chamada logo antes de a tela ser carregada
     useEffect(() => {
-        async function loadStorageDate() {
-            const plantsStoraged = await loadPlant();
-            // Caso alguma planta tenha sido cadastrada
-            if (plantsStoraged.length > 0) {
-                // Definindo quanto tempo falta para a próxima rega (a partir de agora)
-                const nextTime = formatDistance(
-                    new Date(plantsStoraged[0].dateTimeNotification).getTime(),
-                    new Date().getTime(),
-                    // Formatando em pt-BR
-                    { locale: pt },
-                );
-                setNextWatered(
-                    `Não esqueça de regar a ${plantsStoraged[0].name} (${nextTime}).`
-                );
-                // Apresentando as plantas salvas
-                //plantsStoraged.map(item => { console.log(item) })
-            }
-            // Caso nenhuma planta tenha sido cadastrada
-            else setNextWatered(`Nenhuma planta cadastrada.`);
-
-            // Atualizando a lista de plantas do usuário
-            setMyPlants(plantsStoraged);
-            setLoading(false);
-        };
-
         // Chamando a função para carregar os dados
         loadStorageDate();
     }, []);
@@ -123,6 +136,13 @@ export function MyPlants() {
                         />
                     )}
                     showsVerticalScrollIndicator={false}
+                    // Adicionando o controle para atualização da lista ao deslizar a tela
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                        />
+                    }
                 />
             </View>
         </View>
