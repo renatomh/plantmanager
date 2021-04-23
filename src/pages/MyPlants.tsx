@@ -4,27 +4,60 @@ import {
     Text,
     View,
     Image,
-    FlatList
+    FlatList,
+    Alert,
 } from 'react-native';
 
 import { formatDistance } from 'date-fns';
 import { pt } from 'date-fns/locale';
 
-import { loadPlant, PlantProps } from '../libs/storage';
+import { loadPlant, PlantProps, removePlant } from '../libs/storage';
 
 import waterdrop from '../assets/waterdrop.png';
 
+// Componentes
+import { Header } from '../components/Header';
+import { Load } from '../components/Load';
+import { PlantCardSecondary } from '../components/PlantCardSecondary';
+
 import colors from '../styles/colors';
 import fonts from '../styles/fonts';
-import { Header } from '../components/Header';
-import { PlantCardSecondary } from '../components/PlantCardSecondary';
-import { Load } from '../components/Load';
 
 export function MyPlants() {
     // Definindo os estados
     const [myPlants, setMyPlants] = useState<PlantProps[]>([]);
     const [loading, setLoading] = useState(true);
     const [nextWatered, setNextWatered] = useState<string>();
+
+    // Função para lidar com a remoção de itens
+    function handleRemove(plant: PlantProps) {
+        // Alerta de confirmação sobre a exclusão
+        Alert.alert('Remover', `Deseja remover a ${plant.name}?`, [
+            // Vetor com as opções para o diálogo
+            {
+                text: 'Não 🙏',
+                style: 'cancel',
+            },
+            {
+                text: 'Sim 😢',
+                // Função para remoçã do item
+                onPress: async () => {
+                    try {
+                        // Removendo o item
+                        await removePlant(plant.id);
+                        setMyPlants(oldData =>
+                            oldData.filter((item) => item.id != plant.id)
+                        );
+                    } catch (error) {
+                        // Caso ocorra algum erro
+                        Alert.alert('Não foi possível remover! 😢');
+                    }
+                },
+                style: 'default',
+            },
+        ]
+        );
+    }
 
     // A função 'useEffect' é chamada logo antes de a tela ser carregada
     useEffect(() => {
@@ -42,6 +75,8 @@ export function MyPlants() {
                 setNextWatered(
                     `Não esqueça de regar a ${plantsStoraged[0].name} (${nextTime}).`
                 );
+                // Apresentando as plantas salvas
+                //plantsStoraged.map(item => { console.log(item) })
             }
             // Caso nenhuma planta tenha sido cadastrada
             else setNextWatered(`Nenhuma planta cadastrada.`);
@@ -81,7 +116,11 @@ export function MyPlants() {
                     data={myPlants}
                     keyExtractor={(item) => String(item.id)}
                     renderItem={({ item }) => (
-                        <PlantCardSecondary data={item} />
+                        <PlantCardSecondary
+                            data={item}
+                            // Passando a função para exclusão do item
+                            handleRemove={() => { handleRemove(item) }}
+                        />
                     )}
                     showsVerticalScrollIndicator={false}
                 />

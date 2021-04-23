@@ -5,6 +5,7 @@ import {
     Text,
     View,
     Image,
+    ScrollView,
     Platform,
     TouchableOpacity
 } from 'react-native';
@@ -90,79 +91,90 @@ export function PlantSave() {
     };
 
     return (
-        <View style={styles.container}>
-            <View style={styles.plantInfo}>
-                <SvgFromUri
-                    uri={plant.photo}
-                    height={150}
-                    width={150}
-                />
-
-                <Text style={styles.plantName}>
-                    {plant.name}
-                </Text>
-                <Text style={styles.plantAbout}>
-                    {plant.about}
-                </Text>
-            </View>
-
-            <View style={styles.controller}>
-                <View style={styles.tipContainer}>
-                    <Image
-                        source={waterdrop}
-                        style={styles.tipImage}
+        <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.scrollViewContainer}
+        >
+            <View style={styles.container}>
+                <View style={styles.plantInfo}>
+                    <SvgFromUri
+                        uri={plant.photo}
+                        height={150}
+                        width={150}
                     />
-                    <Text style={styles.tipText}>
-                        {plant.water_tips}
+
+                    <Text style={styles.plantName}>
+                        {plant.name}
+                    </Text>
+                    <Text style={styles.plantAbout}>
+                        {plant.about}
                     </Text>
                 </View>
-                <Text style={styles.alertLabel}>
-                    Escolha o melhor horário para ser lembrado:
-                </Text>
 
-                {// Mostrando apenas quando selecionado
-                    showDatePicker &&
-                    (<DateTimePicker
-                        // Documentação: https://github.com/react-native-datetimepicker/datetimepicker#mode-optional
-                        // Definindo onde armazenar o horário escolhido
-                        value={selectedDateTime}
-                        // Escolhendo o tipo de seleção que poderá ser feita
-                        mode="time"
-                        // Caso queiramos utilizar o spinner para a selação
-                        //display="spinner"
-                        onChange={handleChangeTime}
-                    />)
-                }
+                <View style={styles.controller}>
+                    <View style={styles.tipContainer}>
+                        <Image
+                            source={waterdrop}
+                            style={styles.tipImage}
+                        />
+                        <Text style={styles.tipText}>
+                            {plant.water_tips}
+                        </Text>
+                    </View>
+                    <Text style={styles.alertLabel}>
+                        Escolha o melhor horário para ser lembrado:
+                    </Text>
 
-                {
-                    // Adicionando um botão para mostrar o DatePicker no Android
-                    Platform.OS == 'android' && (
-                        <TouchableOpacity
-                            style={styles.dateTimePickerButton}
-                            onPress={handleOpenDateTimePickerForAndroid}
-                        >
-                            <Text style={styles.dateTimePickerText}>
-                                {`Mudar ${format(selectedDateTime, "HH:mm")}`}
-                            </Text>
-                        </TouchableOpacity>
-                    )
-                }
+                    {// Mostrando apenas quando selecionado
+                        showDatePicker &&
+                        (<DateTimePicker
+                            // Documentação: https://github.com/react-native-datetimepicker/datetimepicker#mode-optional
+                            // Definindo onde armazenar o horário escolhido
+                            value={selectedDateTime}
+                            // Escolhendo o tipo de seleção que poderá ser feita
+                            mode="time"
+                            // Caso queiramos utilizar o spinner para a selação
+                            //display="spinner"
+                            onChange={handleChangeTime}
+                        />)
+                    }
 
-                <Button
-                    title="Cadastrar planta"
-                    onPress={handleSave}
-                />
+                    {
+                        // Adicionando um botão para mostrar o DatePicker no Android
+                        Platform.OS == 'android' && (
+                            <TouchableOpacity
+                                style={styles.dateTimePickerButton}
+                                onPress={handleOpenDateTimePickerForAndroid}
+                            >
+                                <Text style={styles.dateTimePickerText}>
+                                    {`Mudar ${format(selectedDateTime, "HH:mm")}`}
+                                </Text>
+                            </TouchableOpacity>
+                        )
+                    }
+
+                    <Button
+                        title="Cadastrar planta"
+                        onPress={handleSave}
+                    />
+                </View>
             </View>
-        </View>
+        </ScrollView>
     )
 }
 
 // Definindo a estilização para os componentes
 const styles = StyleSheet.create({
+    scrollViewContainer: {
+        // No Android, é necessário utilizar o flexGrow para permitir o scroll
+        flexGrow: 1,
+        justifyContent: 'space-between',
+        backgroundColor: colors.shape,
+    },
+
     container: {
         flex: 1,
         justifyContent: 'space-between',
-        //alignItems: 'center',
         backgroundColor: colors.shape,
     },
 
