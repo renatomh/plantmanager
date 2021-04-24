@@ -86,6 +86,8 @@ export function MyPlants() {
                         setMyPlants(oldData =>
                             oldData.filter((item) => item.id != plant.id)
                         );
+                        // Chamando a função para carregar os dados
+                        loadStorageDate();
                     } catch (error) {
                         // Caso ocorra algum erro
                         Alert.alert('Não foi possível remover! 😢');
